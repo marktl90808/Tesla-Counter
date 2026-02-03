@@ -9,6 +9,7 @@ import Foundation
 class TapCountViewModel: ObservableObject {
     @Published var tapCounts: [DailyCount] = []
     @Published var t: Int = UserDefaults.standard.integer(forKey: "Tap")
+    @Published var ct: Int = 0
     var userDefaultsKey = "Tap"
     
     func updateCountForDate(_ date: Date, count: Int) {
@@ -35,6 +36,13 @@ class TapCountViewModel: ObservableObject {
         if let data = UserDefaults.standard.data(forKey: userDefaultsKey) {
             if let savedCounts = try? JSONDecoder().decode([DailyCount].self, from: data) {
                 tapCounts = savedCounts
+                
+                let today = Calendar.current.startOfDay(for: Date())
+                if let todayIndex = tapCounts.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: today) }) {
+                    ct = tapCounts[todayIndex].ct
+                } else {
+                    ct = 0
+                }
             }
         }
     }
@@ -51,7 +59,7 @@ class TapCountViewModel: ObservableObject {
             tapCounts[todayIndex].t += 1
             t = tapCounts[todayIndex].t // Update t to reflect today's count only
         } else {
-            let newCount = DailyCount(id: UUID(), date: today, t: 1)
+            let newCount = DailyCount(id: UUID(), date: today, t: 1, ct: 0)
             tapCounts.append(newCount)
             t = 1 // Set t to 1 as this is the first count for today
         }
@@ -59,6 +67,19 @@ class TapCountViewModel: ObservableObject {
         saveCounts()
         print("Updated tapCount after incrementing:", t)
         print("TapCounts saved to UserDefaults after incrementing:", tapCounts)
+    }
+    
+    func incrementCTForToday() {
+        let today = Calendar.current.startOfDay(for: Date())
+        if let todayIndex = tapCounts.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: today) }) {
+            tapCounts[todayIndex].ct += 1
+            ct = tapCounts[todayIndex].ct
+        } else {
+            let newCount = DailyCount(id: UUID(), date: today, t: 0, ct: 1)
+            tapCounts.append(newCount)
+            ct = 1
+        }
+        saveCounts()
     }
 
     func resetCountForToday() {
@@ -69,6 +90,15 @@ class TapCountViewModel: ObservableObject {
             t = 0 // Reset t to 0 as today's count is reset
             saveCounts()
             print("Resetting tapCounts[todayIndex].t to: \(tapCounts[todayIndex].t)")
+        }
+    }
+    
+    func resetCTForToday() {
+        let today = Calendar.current.startOfDay(for: Date())
+        if let todayIndex = tapCounts.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: today) }) {
+            tapCounts[todayIndex].ct = 0
+            ct = 0
+            saveCounts()
         }
     }
 
@@ -83,7 +113,7 @@ class TapCountViewModel: ObservableObject {
        if let existingIndex = tapCounts.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: date) }) {
             tapCounts[existingIndex].t = countInput
         } else {
-           let newCount = DailyCount(id: UUID(), date: date, t: countInput)
+           let newCount = DailyCount(id: UUID(), date: date, t: countInput, ct: 0)
             tapCounts.append(newCount)
         }
         
