@@ -25,16 +25,28 @@ struct CountHistoryView: View {
             }
             .listStyle(.insetGrouped)
 
-            Button(action: { dismiss() }) {
-                Text("Back")
-                    .font(.headline)
-                    .foregroundColor(.blue)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
+            HStack(spacing: 12) {
+                Button(action: { dismiss() }) {
+                    Text("Back")
+                        .font(.headline)
+                        .foregroundColor(.blue)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("HistoryBackButton")
+
+                Button(action: { viewModel.resetCTForToday() }) {
+                    Text("Reset CT")
+                        .font(.headline)
+                        .foregroundColor(.red)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("HistoryResetCTButton")
             }
-            .buttonStyle(.plain)
             .padding(.horizontal)
-            .accessibilityIdentifier("HistoryBackButton")
         }
         .navigationTitle("Tesla Count History")
     }

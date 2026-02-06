@@ -1,18 +1,16 @@
-//
 //  ContentView.swift
 //  Tesla Counter
 //
-//  Created by Mark Leonard on 12/31/2025.
+//  Created by Mark Leonard on 5/1/2024.
 //
 // ContentView.swift iOS Developer directory.
 // Tesla Counter
 // Modified by Mark Leonard on 5/13/2024. Working: Sound-tada,Tesla, Images,
 // Not Working yet - User provided sounds, images, override counts
 // AI generated code for Tesla Counter.
-// ChatGPT code generated
+// ChatGPT used for some generated code
 import SwiftUI
 import AVFoundation
-//import CoreAudio
 
 // The main view of app.
 struct ContentView: View {
@@ -55,6 +53,8 @@ struct ContentView: View {
     @State var tadaPlayer: AVAudioPlayer?
     @State var oopsPlayer: AVAudioPlayer?
     @State var dingPlayer: AVAudioPlayer?
+    
+    @State private var showSplash: Bool = true
     
     
     func updateCountForDate(_ date: Date, count: Int) {
@@ -150,81 +150,115 @@ struct ContentView: View {
     //    MARK: var body: some View
     var body: some View {
         
-        NavigationStack {
-            VStack {
-                
-                Image("teslaLogo")
-                    .resizable().aspectRatio(contentMode: .fit)
-                    .onTapGesture {
-                        playSound(soundName: "ding")
-                    }
-                // MARK: the override sheet
-   
-                // MARK: after the override sheet
-                                Image("tc.\(currentImageIndex)")
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .onTapGesture {
-                                        viewModel.incrementCountForToday()
-                                        if viewModel.t.isMultiple(of: 10) {
-                                            playSound(soundName: "tada")
-                                        } else {
-                                            playSound(soundName: "Tesla")
+        ZStack {
+            NavigationStack {
+                VStack {
+                    
+                    Image("teslaLogo")
+                        .resizable().aspectRatio(contentMode: .fit)
+                        .onTapGesture {
+                            playSound(soundName: "ding")
+                        }
+                    // MARK: the override sheet
+       
+                    // MARK: after the override sheet
+                                    Image("tc.\(currentImageIndex)")
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .onTapGesture {
+                                            viewModel.incrementCountForToday()
+                                            if viewModel.t.isMultiple(of: 10) {
+                                                playSound(soundName: "tada")
+                                            } else {
+                                                playSound(soundName: "Tesla")
+                                            }
+                                            currentImageIndex = (currentImageIndex + 1) % 19
+                                            UserDefaults.standard.set(viewModel.t, forKey: "Tap")
+                                            storeCount(for: currentDate, count: viewModel.t)
+                                            viewModel.saveCounts()
                                         }
-                                        currentImageIndex = (currentImageIndex + 1) % 19
-                                        UserDefaults.standard.set(viewModel.t, forKey: "Tap")
-                                        storeCount(for: currentDate, count: viewModel.t)
-                                        viewModel.saveCounts()
-                                    }
-                            }
-                            Spacer()
-                            HStack {
-                                Spacer()
-                                Button(iS_O ? " 🔈 on " : " 🔇 off") {
-                                    toggleSound()
                                 }
                                 Spacer()
-                                Button("Add CT") {
-                                    viewModel.incrementCTForToday()
-                                }
-                                .padding(6)
-                                Spacer()
-                                Text("Oops").foregroundColor(.red)
-                                    .onTapGesture {
-                                        playSound(soundName: "oops")
-                                        viewModel.decrementCountForToday()
-                                        print("Teslas: \(viewModel.t)")
+                                HStack {
+                                    Spacer()
+                                    Button(iS_O ? " 🔈 ON " : " 🔇 Off") {
+                                        toggleSound()
                                     }
-                                Spacer()
-                            }
-            
-// Footer with tap count and buttons
-            HStack {
-                Text("Teslas: \(viewModel.t)")
-                    .onTapGesture {
-                        playSound(soundName: "ding")
-                        viewModel.saveCounts()
-                        showAlert = true
-                    }
-                    .foregroundColor(.red)
-                    .padding(1)
+                                    .buttonStyle(.plain)
+                                    .foregroundColor(iS_O ? .green : .red)
+                                    Spacer()
+                                    Button(action: {
+                                        viewModel.incrementCTForToday()
+                                    }) {
+                                        Image("ct")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 64, height: 64)
+                                    }
+                                    .accessibilityLabel("Add CT")
+                                    .buttonStyle(.plain)
+                                    Spacer()
+                                    Text("Oops").foregroundColor(.red)
+                                        .onTapGesture {
+                                            playSound(soundName: "oops")
+                                            viewModel.decrementCountForToday()
+                                            print("Teslas: \(viewModel.t)")
+                                        }
+                                    Spacer()
+                                }
                 
-                Text("CT: \(viewModel.ct)")
+    // Footer with tap count and buttons
+                HStack {
+                    Spacer()
+                    Text("Teslas: \(viewModel.t)")
+                        .onTapGesture {
+                            playSound(soundName: "ding")
+                            viewModel.saveCounts()
+                            showAlert = true
+                        }
+                        .foregroundColor(.red)
+    //                    .padding(1)
+                        Spacer()
+                    Text("CT: \(viewModel.ct)")
+                        .foregroundColor(.green)
+    //                    .padding(1)
+                    Spacer()
+                    NavigationLink("History") {
+                        CountHistoryView(viewModel: viewModel)
+                    }
+                    .buttonStyle(.plain)
                     .foregroundColor(.blue)
-                    .padding(1)
-                                
-                NavigationLink("History") {
-                    CountHistoryView(viewModel: viewModel)
+    //                .padding(0)
+                        Spacer()
                 }
-                .padding(0)
+            }
+    //        Removed navigationDestination block here:
+    //        .navigationDestination(isPresented: $showHistory) {
+    //            CountHistoryView(viewModel: viewModel)
+    //        }
+            .alert(isPresented: $showAlert) {
+                Alert(title: Text("Success"), message: Text("The UserDefaults data was updated."), dismissButton: .default(Text("OK")))
+            }
+            
+            // Splash overlay
+            if showSplash {
+                Color(.systemBackground)
+                    .ignoresSafeArea()
+                Image("tc.0")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: 400)
+                    .padding()
+                    .transition(.opacity)
             }
         }
-//        Removed navigationDestination block here:
-//        .navigationDestination(isPresented: $showHistory) {
-//            CountHistoryView(viewModel: viewModel)
-//        }
-        .alert(isPresented: $showAlert) {
-            Alert(title: Text("Success"), message: Text("The UserDefaults data was updated."), dismissButton: .default(Text("OK")))
+        .onAppear {
+            // Dismiss splash after a short delay
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                withAnimation(.easeInOut(duration: 0.4)) {
+                    showSplash = false
+                }
+            }
         }
     }
 }
