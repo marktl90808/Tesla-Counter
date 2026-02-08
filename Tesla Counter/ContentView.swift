@@ -189,6 +189,7 @@ struct ContentView: View {
                                     Spacer()
                                     Button(action: {
                                         viewModel.incrementCTForToday()
+                                        playSound(soundName: "Cybertruck")
                                     }) {
                                         Image("ct")
                                             .resizable()
