@@ -36,11 +36,13 @@ class TapCountViewModel: ObservableObject {
         if let data = UserDefaults.standard.data(forKey: userDefaultsKey) {
             if let savedCounts = try? JSONDecoder().decode([DailyCount].self, from: data) {
                 tapCounts = savedCounts
-                
+
                 let today = Calendar.current.startOfDay(for: Date())
                 if let todayIndex = tapCounts.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: today) }) {
+                    t = tapCounts[todayIndex].t
                     ct = tapCounts[todayIndex].ct
                 } else {
+                    t = 0
                     ct = 0
                 }
             }

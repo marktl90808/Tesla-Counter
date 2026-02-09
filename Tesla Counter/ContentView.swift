@@ -254,6 +254,7 @@ struct ContentView: View {
             }
         }
         .onAppear {
+            viewModel.loadCounts()
             // Dismiss splash after a short delay
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 withAnimation(.easeInOut(duration: 0.4)) {
