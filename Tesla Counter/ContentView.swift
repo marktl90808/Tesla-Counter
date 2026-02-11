@@ -1,14 +1,13 @@
 //  ContentView.swift
 //  Tesla Counter
 //
-//  Created by Mark Leonard on 5/1/2024.
+//  Started by Mark Leonard on 2/1/2024.
 //
 // ContentView.swift iOS Developer directory.
 // Tesla Counter
-// Modified by Mark Leonard on 5/13/2024. Working: Sound-tada,Tesla, Images,
+// Working: Sound-tada,Tesla, oops, ding, Cybertruck
 // Not Working yet - User provided sounds, images, override counts
 // AI generated code for Tesla Counter.
-// ChatGPT used for some generated code
 import SwiftUI
 import AVFoundation
 
@@ -114,7 +113,6 @@ struct ContentView: View {
             print("Error playing sound: \(error.localizedDescription)")
         }
     }
-    
     func playSound(for tapCount: Int) {
         guard iS_O else { return }
         let soundName = viewModel.t % 10 == 0 ? "tada" : "Tesla"
@@ -194,7 +192,7 @@ struct ContentView: View {
                                         Image("ct")
                                             .resizable()
                                             .scaledToFit()
-                                            .frame(width: 64, height: 64)
+                                            .frame(width: 96, height: 96)
                                     }
                                     .accessibilityLabel("Add CT")
                                     .buttonStyle(.plain)
