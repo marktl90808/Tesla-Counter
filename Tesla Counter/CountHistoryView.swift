@@ -26,16 +26,6 @@ struct CountHistoryView: View {
             .listStyle(.insetGrouped)
 
             HStack(spacing: 12) {
-                Button(action: { dismiss() }) {
-                    Text("Back")
-                        .font(.headline)
-                        .foregroundColor(.blue)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("HistoryBackButton")
-
                 Button(action: { viewModel.resetCTForToday() }) {
                     Text("Reset CT")
                         .font(.headline)
@@ -45,6 +35,16 @@ struct CountHistoryView: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("HistoryResetCTButton")
+
+                Button(action: { dismiss() }) {
+                    Text("Back")
+                        .font(.headline)
+                        .foregroundColor(.blue)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("HistoryBackButton")
             }
             .padding(.horizontal)
         }
