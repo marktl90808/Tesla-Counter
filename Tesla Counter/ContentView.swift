@@ -35,6 +35,10 @@ struct ContentView: View {
                 viewModel.t = countForToday
             }
         }
+        
+        if UserDefaults.standard.integer(forKey: "CelebrationMultiple") == 0 {
+            UserDefaults.standard.set(10, forKey: "CelebrationMultiple")
+        }
     }
 
     //MARK: Not in Chat GPT code ->
@@ -54,6 +58,8 @@ struct ContentView: View {
     @State var dingPlayer: AVAudioPlayer?
     
     @State private var showSplash: Bool = true
+    @State private var showPreferences = false
+    @State private var celebrationMultiple: Int = UserDefaults.standard.integer(forKey: "CelebrationMultiple") == 0 ? 10 : UserDefaults.standard.integer(forKey: "CelebrationMultiple")
     
     
     func updateCountForDate(_ date: Date, count: Int) {
@@ -155,7 +161,7 @@ struct ContentView: View {
                     Image("teslaLogo")
                         .resizable().aspectRatio(contentMode: .fit)
                         .onTapGesture {
-                            playSound(soundName: "ding")
+                            showPreferences = true
                         }
                     // MARK: the override sheet
        
@@ -165,7 +171,7 @@ struct ContentView: View {
                                         .aspectRatio(contentMode: .fit)
                                         .onTapGesture {
                                             viewModel.incrementCountForToday()
-                                            if viewModel.t.isMultiple(of: 10) {
+                                            if viewModel.t.isMultiple(of: celebrationMultiple) {
                                                 playSound(soundName: "tada")
                                             } else {
                                                 playSound(soundName: "Tesla")
@@ -231,12 +237,51 @@ struct ContentView: View {
                         Spacer()
                 }
             }
-    //        Removed navigationDestination block here:
-    //        .navigationDestination(isPresented: $showHistory) {
-    //            CountHistoryView(viewModel: viewModel)
-    //        }
             .alert(isPresented: $showAlert) {
                 Alert(title: Text("Success"), message: Text("The UserDefaults data was updated."), dismissButton: .default(Text("OK")))
+            }
+            .sheet(isPresented: $showPreferences) {
+                NavigationStack {
+                    Form {
+                        Section(header: Text("Override Quantity")) {
+                            Stepper(value: $celebrationMultiple, in: 1...500) {
+                                HStack {
+                                    Text("Celebrate every")
+                                    Spacer()
+                                    Text("\(celebrationMultiple)")
+                                        .monospacedDigit()
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            Text("When Teslas count reaches a multiple of this number, the 'tada' sound plays. Otherwise, 'Tesla' plays.")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                        }
+                        Section {
+                            Button(role: .none) {
+                                showPreferences = false
+                            } label: {
+                                HStack {
+                                    Spacer()
+                                    Text("Close Prefrences")
+                                    Spacer()
+                                }
+                            }
+                        }
+                    }
+                    .navigationTitle("Prefrences")
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Cancel") { showPreferences = false }
+                        }
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Save") {
+                                UserDefaults.standard.set(celebrationMultiple, forKey: "CelebrationMultiple")
+                                showPreferences = false
+                            }
+                        }
+                    }
+                }
             }
             
             // Splash overlay
@@ -253,6 +298,8 @@ struct ContentView: View {
         }
         .onAppear {
             viewModel.loadCounts()
+            let saved = UserDefaults.standard.integer(forKey: "CelebrationMultiple")
+            if saved > 0 { celebrationMultiple = saved }
             // Dismiss splash after a short delay
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 withAnimation(.easeInOut(duration: 0.4)) {

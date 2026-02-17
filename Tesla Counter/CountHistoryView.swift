@@ -17,10 +17,25 @@ struct CountHistoryView: View {
             List(viewModel.tapCounts.sorted(by: { $0.date > $1.date })) { count in
                 HStack {
                     Text("\(count.date, formatter: dateFormatter):")
-                    Spacer()
-                    Text(" \(count.t)")
-                    Spacer()
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .layoutPriority(0)
+
+                    Spacer(minLength: 8)
+
+                    Text("\(count.t)")
+                        .monospacedDigit()
+                        .frame(minWidth: 28, alignment: .trailing)
+                        .lineLimit(1)
+                        .layoutPriority(1)
+
+                    Spacer(minLength: 8)
+
                     Text("CT: \(count.ct)")
+                        .monospacedDigit()
+                        .frame(minWidth: 56, alignment: .trailing)
+                        .lineLimit(1)
+                        .layoutPriority(1)
                 }
             }
             .listStyle(.insetGrouped)
