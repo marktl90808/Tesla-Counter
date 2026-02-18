@@ -263,13 +263,13 @@ struct ContentView: View {
                             } label: {
                                 HStack {
                                     Spacer()
-                                    Text("Close Prefrences")
+                                    Text("Close Preferences")
                                     Spacer()
                                 }
                             }
                         }
                     }
-                    .navigationTitle("Prefrences")
+                    .navigationTitle("Preferences")
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
                             Button("Cancel") { showPreferences = false }
