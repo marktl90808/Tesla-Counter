@@ -10,6 +10,7 @@
 // AI generated code for Tesla Counter.
 import SwiftUI
 import AVFoundation
+import Combine
 
 // The main view of app.
 struct ContentView: View {
@@ -56,6 +57,12 @@ struct ContentView: View {
     @State var tadaPlayer: AVAudioPlayer?
     @State var oopsPlayer: AVAudioPlayer?
     @State var dingPlayer: AVAudioPlayer?
+    
+    // Recording and custom sound state
+    @State private var audioRecorder: AVAudioRecorder?
+    @State private var isRecording: Bool = false
+    @State private var customSoundURL: URL? = UserDefaults.standard.url(forKey: "CustomSoundURL")
+    @State private var customSoundName: String = UserDefaults.standard.string(forKey: "CustomSoundName") ?? ""
     
     @State private var showSplash: Bool = true
     @State private var showPreferences = false
@@ -147,6 +154,87 @@ struct ContentView: View {
         }
     }
     
+    // MARK: - Custom Sound Helpers
+    func documentsDirectory() -> URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    }
+
+    func beginRecording() {
+        // Request record permission then start
+        AVAudioSession.sharedInstance().requestRecordPermission { granted in
+            DispatchQueue.main.async {
+                guard granted else {
+                    print("Microphone permission denied")
+                    return
+                }
+                do {
+                    let session = AVAudioSession.sharedInstance()
+                    try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
+                    try session.setActive(true)
+
+                    let filename = "customSound.m4a"
+                    let url = documentsDirectory().appendingPathComponent(filename)
+
+                    let settings: [String: Any] = [
+                        AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+                        AVSampleRateKey: 44100,
+                        AVNumberOfChannelsKey: 1,
+                        AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+                    ]
+
+                    audioRecorder = try AVAudioRecorder(url: url, settings: settings)
+                    audioRecorder?.prepareToRecord()
+                    audioRecorder?.record()
+                    isRecording = true
+                } catch {
+                    print("Failed to start recording: \(error)")
+                }
+            }
+        }
+    }
+
+    func stopRecording(saveAs name: String?) {
+        audioRecorder?.stop()
+        isRecording = false
+        guard let url = audioRecorder?.url else { return }
+        let displayName = (name?.isEmpty == false) ? name! : url.lastPathComponent
+        customSoundURL = url
+        customSoundName = displayName
+        UserDefaults.standard.set(url, forKey: "CustomSoundURL")
+        UserDefaults.standard.set(displayName, forKey: "CustomSoundName")
+        audioRecorder = nil
+    }
+
+    func removeCustomSound() {
+        if let url = customSoundURL {
+            // Optionally delete file from disk
+            try? FileManager.default.removeItem(at: url)
+        }
+        customSoundURL = nil
+        customSoundName = ""
+        UserDefaults.standard.removeObject(forKey: "CustomSoundURL")
+        UserDefaults.standard.removeObject(forKey: "CustomSoundName")
+    }
+
+    func playCustomOrDefault() {
+        // If a custom sound exists, play it; otherwise fall back to existing logic
+        if let url = customSoundURL {
+            do {
+                player = try AVAudioPlayer(contentsOf: url)
+                player?.play()
+                return
+            } catch {
+                print("Error playing custom sound: \(error)")
+            }
+        }
+        // Fallback: use existing celebration logic
+        if viewModel.t.isMultiple(of: celebrationMultiple) {
+            playSound(soundName: "tada")
+        } else {
+            playSound(soundName: "Tesla")
+        }
+    }
+    
     func toggleSound() {
         iS_O.toggle()
     }
@@ -171,11 +259,7 @@ struct ContentView: View {
                                         .aspectRatio(contentMode: .fit)
                                         .onTapGesture {
                                             viewModel.incrementCountForToday()
-                                            if viewModel.t.isMultiple(of: celebrationMultiple) {
-                                                playSound(soundName: "tada")
-                                            } else {
-                                                playSound(soundName: "Tesla")
-                                            }
+                                            playCustomOrDefault()
                                             currentImageIndex = (currentImageIndex + 1) % 19
                                             UserDefaults.standard.set(viewModel.t, forKey: "Tap")
                                             storeCount(for: currentDate, count: viewModel.t)
@@ -257,6 +341,46 @@ struct ContentView: View {
                                 .font(.footnote)
                                 .foregroundColor(.secondary)
                         }
+                        Section(header: Text("Custom Sound")) {
+                            if let name = customSoundName.isEmpty ? nil : customSoundName {
+                                HStack {
+                                    Text("Current:")
+                                    Spacer()
+                                    Text(name).foregroundColor(.secondary)
+                                }
+                            } else {
+                                Text("No custom sound set")
+                                    .foregroundColor(.secondary)
+                            }
+
+                            HStack(spacing: 16) {
+                                Button(isRecording ? "Stop Recording" : "Record") {
+                                    if isRecording {
+                                        stopRecording(saveAs: customSoundName)
+                                    } else {
+                                        beginRecording()
+                                    }
+                                }
+                                .buttonStyle(.borderedProminent)
+
+                                if customSoundURL != nil {
+                                    Button("Play") {
+                                        playCustomOrDefault()
+                                    }
+                                    .buttonStyle(.bordered)
+
+                                    Button(role: .destructive) {
+                                        removeCustomSound()
+                                    } label: {
+                                        Text("Remove")
+                                    }
+                                }
+                            }
+
+                            TextField("Custom name (optional)", text: $customSoundName)
+                                .textInputAutocapitalization(.words)
+                                .disableAutocorrection(true)
+                        }
                         Section {
                             Button(role: .none) {
                                 showPreferences = false
@@ -277,6 +401,10 @@ struct ContentView: View {
                         ToolbarItem(placement: .confirmationAction) {
                             Button("Save") {
                                 UserDefaults.standard.set(celebrationMultiple, forKey: "CelebrationMultiple")
+                                if let url = customSoundURL {
+                                    UserDefaults.standard.set(url, forKey: "CustomSoundURL")
+                                }
+                                UserDefaults.standard.set(customSoundName, forKey: "CustomSoundName")
                                 showPreferences = false
                             }
                         }
@@ -300,6 +428,8 @@ struct ContentView: View {
             viewModel.loadCounts()
             let saved = UserDefaults.standard.integer(forKey: "CelebrationMultiple")
             if saved > 0 { celebrationMultiple = saved }
+            customSoundURL = UserDefaults.standard.url(forKey: "CustomSoundURL")
+            customSoundName = UserDefaults.standard.string(forKey: "CustomSoundName") ?? ""
             // Dismiss splash after a short delay
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 withAnimation(.easeInOut(duration: 0.4)) {
