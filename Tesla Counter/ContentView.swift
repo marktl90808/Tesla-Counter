@@ -64,6 +64,12 @@ struct ContentView: View {
     @State private var customSoundURL: URL? = UserDefaults.standard.url(forKey: "CustomSoundURL")
     @State private var customSoundName: String = UserDefaults.standard.string(forKey: "CustomSoundName") ?? ""
     
+    // CT custom sound state
+    @State private var ctAudioRecorder: AVAudioRecorder?
+    @State private var isCTRecording: Bool = false
+    @State private var customCTSoundURL: URL? = UserDefaults.standard.url(forKey: "CustomCTSoundURL")
+    @State private var customCTSoundName: String = UserDefaults.standard.string(forKey: "CustomCTSoundName") ?? ""
+    
     @State private var showSplash: Bool = true
     @State private var showPreferences = false
     @State private var celebrationMultiple: Int = UserDefaults.standard.integer(forKey: "CelebrationMultiple") == 0 ? 10 : UserDefaults.standard.integer(forKey: "CelebrationMultiple")
@@ -160,7 +166,6 @@ struct ContentView: View {
     }
 
     func beginRecording() {
-        // Request record permission then start
         AVAudioSession.sharedInstance().requestRecordPermission { granted in
             DispatchQueue.main.async {
                 guard granted else {
@@ -207,7 +212,6 @@ struct ContentView: View {
 
     func removeCustomSound() {
         if let url = customSoundURL {
-            // Optionally delete file from disk
             try? FileManager.default.removeItem(at: url)
         }
         customSoundURL = nil
@@ -217,7 +221,6 @@ struct ContentView: View {
     }
 
     func playCustomOrDefault() {
-        // If a custom sound exists, play it; otherwise fall back to existing logic
         if let url = customSoundURL {
             do {
                 player = try AVAudioPlayer(contentsOf: url)
@@ -227,12 +230,80 @@ struct ContentView: View {
                 print("Error playing custom sound: \(error)")
             }
         }
-        // Fallback: use existing celebration logic
         if viewModel.t.isMultiple(of: celebrationMultiple) {
             playSound(soundName: "tada")
         } else {
             playSound(soundName: "Tesla")
         }
+    }
+
+    func beginCTRecording() {
+        AVAudioSession.sharedInstance().requestRecordPermission { granted in
+            DispatchQueue.main.async {
+                guard granted else {
+                    print("Microphone permission denied for CT recording")
+                    return
+                }
+                do {
+                    let session = AVAudioSession.sharedInstance()
+                    try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
+                    try session.setActive(true)
+
+                    let filename = "customCTSound.m4a"
+                    let url = documentsDirectory().appendingPathComponent(filename)
+
+                    let settings: [String: Any] = [
+                        AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+                        AVSampleRateKey: 44100,
+                        AVNumberOfChannelsKey: 1,
+                        AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+                    ]
+
+                    ctAudioRecorder = try AVAudioRecorder(url: url, settings: settings)
+                    ctAudioRecorder?.prepareToRecord()
+                    ctAudioRecorder?.record()
+                    isCTRecording = true
+                } catch {
+                    print("Failed to start CT recording: \(error)")
+                }
+            }
+        }
+    }
+
+    func stopCTRecording(saveAs name: String?) {
+        ctAudioRecorder?.stop()
+        isCTRecording = false
+        guard let url = ctAudioRecorder?.url else { return }
+        let displayName = (name?.isEmpty == false) ? name! : url.lastPathComponent
+        customCTSoundURL = url
+        customCTSoundName = displayName
+        UserDefaults.standard.set(url, forKey: "CustomCTSoundURL")
+        UserDefaults.standard.set(displayName, forKey: "CustomCTSoundName")
+        ctAudioRecorder = nil
+    }
+
+    func removeCustomCTSound() {
+        if let url = customCTSoundURL {
+            try? FileManager.default.removeItem(at: url)
+        }
+        customCTSoundURL = nil
+        customCTSoundName = ""
+        UserDefaults.standard.removeObject(forKey: "CustomCTSoundURL")
+        UserDefaults.standard.removeObject(forKey: "CustomCTSoundName")
+    }
+
+    func playCustomCTOrDefault() {
+        guard iS_O else { return }
+        if let url = customCTSoundURL {
+            do {
+                player = try AVAudioPlayer(contentsOf: url)
+                player?.play()
+                return
+            } catch {
+                print("Error playing custom CT sound: \(error)")
+            }
+        }
+        playSound(soundName: "Cybertruck")
     }
     
     func toggleSound() {
@@ -277,7 +348,7 @@ struct ContentView: View {
                                     Spacer()
                                     Button(action: {
                                         viewModel.incrementCTForToday()
-                                        playSound(soundName: "Cybertruck")
+                                        playCustomCTOrDefault()
                                     }) {
                                         Image("ct")
                                             .resizable()
@@ -342,11 +413,11 @@ struct ContentView: View {
                                 .foregroundColor(.secondary)
                         }
                         Section(header: Text("Custom Sound")) {
-                            if let name = customSoundName.isEmpty ? nil : customSoundName {
+                            if customSoundName.isEmpty == false {
                                 HStack {
                                     Text("Current:")
                                     Spacer()
-                                    Text(name).foregroundColor(.secondary)
+                                    Text(customSoundName).foregroundColor(.secondary)
                                 }
                             } else {
                                 Text("No custom sound set")
@@ -381,6 +452,46 @@ struct ContentView: View {
                                 .textInputAutocapitalization(.words)
                                 .disableAutocorrection(true)
                         }
+                        Section(header: Text("Custom CT Sound")) {
+                            if customCTSoundName.isEmpty == false {
+                                HStack {
+                                    Text("Current:")
+                                    Spacer()
+                                    Text(customCTSoundName).foregroundColor(.secondary)
+                                }
+                            } else {
+                                Text("No custom CT sound set")
+                                    .foregroundColor(.secondary)
+                            }
+
+                            HStack(spacing: 16) {
+                                Button(isCTRecording ? "Stop Recording" : "Record") {
+                                    if isCTRecording {
+                                        stopCTRecording(saveAs: customCTSoundName)
+                                    } else {
+                                        beginCTRecording()
+                                    }
+                                }
+                                .buttonStyle(.borderedProminent)
+
+                                if customCTSoundURL != nil {
+                                    Button("Play") {
+                                        playCustomCTOrDefault()
+                                    }
+                                    .buttonStyle(.bordered)
+
+                                    Button(role: .destructive) {
+                                        removeCustomCTSound()
+                                    } label: {
+                                        Text("Remove")
+                                    }
+                                }
+                            }
+
+                            TextField("Custom CT name (optional)", text: $customCTSoundName)
+                                .textInputAutocapitalization(.words)
+                                .disableAutocorrection(true)
+                        }
                         Section {
                             Button(role: .none) {
                                 showPreferences = false
@@ -405,6 +516,10 @@ struct ContentView: View {
                                     UserDefaults.standard.set(url, forKey: "CustomSoundURL")
                                 }
                                 UserDefaults.standard.set(customSoundName, forKey: "CustomSoundName")
+                                if let ctURL = customCTSoundURL {
+                                    UserDefaults.standard.set(ctURL, forKey: "CustomCTSoundURL")
+                                }
+                                UserDefaults.standard.set(customCTSoundName, forKey: "CustomCTSoundName")
                                 showPreferences = false
                             }
                         }
@@ -428,8 +543,14 @@ struct ContentView: View {
             viewModel.loadCounts()
             let saved = UserDefaults.standard.integer(forKey: "CelebrationMultiple")
             if saved > 0 { celebrationMultiple = saved }
+            
             customSoundURL = UserDefaults.standard.url(forKey: "CustomSoundURL")
             customSoundName = UserDefaults.standard.string(forKey: "CustomSoundName") ?? ""
+            customCTSoundURL = UserDefaults.standard.url(forKey: "CustomCTSoundURL")
+            customCTSoundName = UserDefaults.standard.string(forKey: "CustomCTSoundName") ?? ""
+            
+            // Removed loading customSoundURL, customSoundName, customCTSoundURL, customCTSoundName since handled by SoundRecorder
+            
             // Dismiss splash after a short delay
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 withAnimation(.easeInOut(duration: 0.4)) {
