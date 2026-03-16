@@ -396,8 +396,8 @@ struct ContentView: View {
                 Alert(title: Text("Success"), message: Text("The UserDefaults data was updated."), dismissButton: .default(Text("OK")))
             }
             .sheet(isPresented: $showPreferences) {
-                NavigationStack {
-                    Form {
+                Form {
+                    // Keep the existing sections and content exactly as-is
                         Section(header: Text("Override Quantity")) {
                             Stepper(value: $celebrationMultiple, in: 1...500) {
                                 HStack {
@@ -503,25 +503,24 @@ struct ContentView: View {
                                 }
                             }
                         }
+                }
+                .navigationTitle("Preferences")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") { showPreferences = false }
                     }
-                    .navigationTitle("Preferences")
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Cancel") { showPreferences = false }
-                        }
-                        ToolbarItem(placement: .confirmationAction) {
-                            Button("Save") {
-                                UserDefaults.standard.set(celebrationMultiple, forKey: "CelebrationMultiple")
-                                if let url = customSoundURL {
-                                    UserDefaults.standard.set(url, forKey: "CustomSoundURL")
-                                }
-                                UserDefaults.standard.set(customSoundName, forKey: "CustomSoundName")
-                                if let ctURL = customCTSoundURL {
-                                    UserDefaults.standard.set(ctURL, forKey: "CustomCTSoundURL")
-                                }
-                                UserDefaults.standard.set(customCTSoundName, forKey: "CustomCTSoundName")
-                                showPreferences = false
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Save") {
+                            UserDefaults.standard.set(celebrationMultiple, forKey: "CelebrationMultiple")
+                            if let url = customSoundURL {
+                                UserDefaults.standard.set(url, forKey: "CustomSoundURL")
                             }
+                            UserDefaults.standard.set(customSoundName, forKey: "CustomSoundName")
+                            if let ctURL = customCTSoundURL {
+                                UserDefaults.standard.set(ctURL, forKey: "CustomCTSoundURL")
+                            }
+                            UserDefaults.standard.set(customCTSoundName, forKey: "CustomCTSoundName")
+                            showPreferences = false
                         }
                     }
                 }
