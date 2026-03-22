@@ -5,8 +5,11 @@
 //
 
 import Foundation
+import WatchConnectivity
 
 class TapCountViewModel: ObservableObject {
+    static let shared = TapCountViewModel()
+
     @Published var tapCounts: [DailyCount] = []
     @Published var t: Int = UserDefaults.standard.integer(forKey: "Tap")
     @Published var ct: Int = 0
@@ -69,6 +72,11 @@ class TapCountViewModel: ObservableObject {
         saveCounts()
         print("Updated tapCount after incrementing:", t)
         print("TapCounts saved to UserDefaults after incrementing:", tapCounts)
+        
+        // NEW Send updated counts to watch.
+        
+        PhoneConnectivity.shared.sendCountToWatch(t)
+
     }
     
     func incrementCTForToday() {
@@ -83,6 +91,21 @@ class TapCountViewModel: ObservableObject {
         }
         saveCounts()
     }
+
+    func updateCountFromWatch(_ newCount: Int) {
+        let today = Calendar.current.startOfDay(for: Date())
+
+        if let todayIndex = tapCounts.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: today) }) {
+            tapCounts[todayIndex].t = newCount
+        } else {
+            let newDaily = DailyCount(id: UUID(), date: today, t: newCount, ct: 0)
+            tapCounts.append(newDaily)
+        }
+
+        t = newCount
+        saveCounts()
+    }
+
 
     func resetCountForToday() {
         let today = Calendar.current.startOfDay(for: Date())

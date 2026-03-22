@@ -9,6 +9,9 @@ import SwiftUI
 
 @main
 struct Tesla_CounterApp: App {
+    init() {
+        _ = PhoneConnectivity.shared
+    }
     var body: some Scene {
         WindowGroup {
             ContentView()
