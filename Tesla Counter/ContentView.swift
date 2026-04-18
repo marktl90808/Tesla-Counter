@@ -73,7 +73,11 @@ struct ContentView: View {
     @State private var showSplash: Bool = true
     @State private var showPreferences = false
     @State private var celebrationMultiple: Int = UserDefaults.standard.integer(forKey: "CelebrationMultiple") == 0 ? 10 : UserDefaults.standard.integer(forKey: "CelebrationMultiple")
-    
+
+    // Watch connectivity state for UI
+    @State private var isWatchPaired: Bool = false
+    @State private var isWatchReachable: Bool = false
+    @State private var isWatchAppInstalled: Bool = false
     
     func updateCountForDate(_ date: Date, count: Int) {
 // Retrieve existing data from UserDefaults
@@ -166,7 +170,8 @@ struct ContentView: View {
     }
 
     func beginRecording() {
-        AVAudioSession.sharedInstance().requestRecordPermission { granted in
+        // Use the modern iOS 17+ API when available; fall back to the older API for earlier OS versions.
+        let permissionHandler: (Bool) -> Void = { granted in
             DispatchQueue.main.async {
                 guard granted else {
                     print("Microphone permission denied")
@@ -194,6 +199,17 @@ struct ContentView: View {
                 } catch {
                     print("Failed to start recording: \(error)")
                 }
+            }
+        }
+
+        if #available(iOS 17.0, *) {
+            // New API on iOS 17 — use the modern Swift API name
+            AVAudioApplication.requestRecordPermission { granted in
+                permissionHandler(granted)
+            }
+        } else {
+            AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                permissionHandler(granted)
             }
         }
     }
@@ -238,7 +254,7 @@ struct ContentView: View {
     }
 
     func beginCTRecording() {
-        AVAudioSession.sharedInstance().requestRecordPermission { granted in
+        let permissionHandler: (Bool) -> Void = { granted in
             DispatchQueue.main.async {
                 guard granted else {
                     print("Microphone permission denied for CT recording")
@@ -266,6 +282,16 @@ struct ContentView: View {
                 } catch {
                     print("Failed to start CT recording: \(error)")
                 }
+            }
+        }
+
+        if #available(iOS 17.0, *) {
+            AVAudioApplication.requestRecordPermission { granted in
+                permissionHandler(granted)
+            }
+        } else {
+            AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                permissionHandler(granted)
             }
         }
     }
@@ -312,11 +338,34 @@ struct ContentView: View {
     
     //    MARK: var body: some View
     var body: some View {
-        
+
         ZStack {
             NavigationStack {
                 VStack {
-                    
+
+                    // Watch status row
+                    HStack(spacing: 8) {
+                        Image(systemName: isWatchReachable ? "link.circle.fill" : "link.circle")
+                            .foregroundColor(isWatchReachable ? .green : .secondary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(isWatchPaired ? "Watch Paired" : "Watch Not Paired")
+                                .font(.caption2)
+                            Text(isWatchAppInstalled ? "Watch App Installed" : "Watch App Not Installed")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        Button(action: {
+                            // Force sending current counts to watch
+                            PhoneConnectivity.shared.updateWatch()
+                        }) {
+                            Text("Sync")
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+
                     Image("teslaLogo")
                         .resizable().aspectRatio(contentMode: .fit)
                         .onTapGesture {
@@ -538,18 +587,30 @@ struct ContentView: View {
                     .transition(.opacity)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity) // ensure view fills the whole screen
+        .background(Color(.systemBackground).ignoresSafeArea())
         .onAppear {
             viewModel.loadCounts()
             let saved = UserDefaults.standard.integer(forKey: "CelebrationMultiple")
             if saved > 0 { celebrationMultiple = saved }
-            
+
             customSoundURL = UserDefaults.standard.url(forKey: "CustomSoundURL")
             customSoundName = UserDefaults.standard.string(forKey: "CustomSoundName") ?? ""
             customCTSoundURL = UserDefaults.standard.url(forKey: "CustomCTSoundURL")
             customCTSoundName = UserDefaults.standard.string(forKey: "CustomCTSoundName") ?? ""
-            
-            // Removed loading customSoundURL, customSoundName, customCTSoundURL, customCTSoundName since handled by SoundRecorder
-            
+
+            // Observe phone connectivity updates
+            NotificationCenter.default.addObserver(forName: .phoneConnectivityDidUpdate, object: nil, queue: .main) { note in
+                if let info = note.userInfo {
+                    if let paired = info["isPaired"] as? Bool { isWatchPaired = paired }
+                    if let installed = info["isWatchAppInstalled"] as? Bool { isWatchAppInstalled = installed }
+                    if let reachable = info["isReachable"] as? Bool { isWatchReachable = reachable }
+                }
+            }
+
+            // Request an initial sync to update watch state
+            PhoneConnectivity.shared.updateWatch()
+
             // Dismiss splash after a short delay
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 withAnimation(.easeInOut(duration: 0.4)) {
@@ -576,4 +637,3 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
-

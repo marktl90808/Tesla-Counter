@@ -4,22 +4,21 @@
 import SwiftUI
 
 struct WatchContentView: View {
-    @State private var teslaCount: Int = 0
-    @State private var ctCount: Int = 0
+    @StateObject private var session = WatchSessionManager.shared
 
     var body: some View {
         VStack(spacing: 8) {
             Text("Teslas")
                 .font(.caption)
                 .foregroundColor(.red)
-            Text("\(teslaCount)")
+            Text("\(session.teslaCount)")
                 .font(.title)
                 .foregroundColor(.red)
             HStack {
-                Button(action: { teslaCount = max(0, teslaCount - 1) }) {
+                Button(action: { session.send(action: "decrementTesla") }) {
                     Image(systemName: "minus.circle.fill")
                 }
-                Button(action: { teslaCount += 1 }) {
+                Button(action: { session.send(action: "incrementTesla") }) {
                     Image(systemName: "plus.circle.fill")
                 }
             }
@@ -27,14 +26,20 @@ struct WatchContentView: View {
             Text("CT")
                 .font(.caption)
                 .foregroundColor(.green)
-            Text("\(ctCount)")
+            Text("\(session.ctCount)")
                 .font(.title)
                 .foregroundColor(.green)
-            Button(action: { ctCount += 1 }) {
+            Button(action: { session.send(action: "incrementCT") }) {
                 Image(systemName: "plus.circle.fill")
+            }
+            Button("Refresh") {
+                session.requestCounts()
             }
         }
         .padding()
+        .onAppear {
+            session.requestCounts()
+        }
     }
 }
 

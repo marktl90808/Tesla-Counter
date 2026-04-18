@@ -27,7 +27,11 @@ class PhoneConnectivity: NSObject, WCSessionDelegate {
 
     func session(_ session: WCSession,
                  activationDidCompleteWith activationState: WCSessionActivationState,
-                 error: Error?) {}
+                 error: Error?) {
+        // Log activation details and notify UI
+        print("WCSession activated: state=\(activationState.rawValue), paired=\(session.isPaired), watchAppInstalled=\(session.isWatchAppInstalled), reachable=\(session.isReachable)")
+        NotificationCenter.default.post(name: .phoneConnectivityDidUpdate, object: nil, userInfo: ["isPaired": session.isPaired, "isWatchAppInstalled": session.isWatchAppInstalled, "isReachable": session.isReachable])
+    }
 
     // MARK: - Sending Data to Watch
     
@@ -62,23 +66,42 @@ class PhoneConnectivity: NSObject, WCSessionDelegate {
 
     // MARK: - Receiving Data from Watch
     
+    /// Extracted to make message processing testable and reusable
+    func processIncomingMessage(_ message: [String: Any]) {
+        if let action = message["action"] as? String {
+            switch action {
+            case "incrementTesla":
+                TapCountViewModel.shared.incrementCountForToday()
+                print("Watch: Incrementing Tesla count")
+            case "incrementCT":
+                TapCountViewModel.shared.incrementCTForToday()
+                print("Watch: Incrementing CT count")
+            case "decrementTesla":
+                TapCountViewModel.shared.decrementCountForToday()
+                print("Watch: Decrementing Tesla count")
+            case "requestCounts":
+                // Watch is asking for the latest counts
+                updateWatch()
+            default:
+                break
+            }
+            return
+        }
+
+        // If the message contains absolute counts, update directly
+        if let teslaCount = message["teslaCount"] as? Int {
+            TapCountViewModel.shared.updateCountFromWatch(teslaCount)
+            print("Watch: Set Tesla count to \(teslaCount)")
+        }
+        if let ctCount = message["ctCount"] as? Int {
+            TapCountViewModel.shared.updateCTFromWatch(ctCount)
+            print("Watch: Set CT count to \(ctCount)")
+        }
+    }
+
     func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
         DispatchQueue.main.async {
-            if let action = message["action"] as? String {
-                switch action {
-                case "incrementTesla":
-                    TapCountViewModel.shared.incrementCountForToday()
-                    print("Watch: Incrementing Tesla count")
-                case "incrementCT":
-                    TapCountViewModel.shared.incrementCTForToday()
-                    print("Watch: Incrementing CT count")
-                case "decrementTesla":
-                    TapCountViewModel.shared.decrementCountForToday()
-                    print("Watch: Decrementing Tesla count")
-                default:
-                    break
-                }
-            }
+            self.processIncomingMessage(message)
         }
     }
     
@@ -88,4 +111,8 @@ class PhoneConnectivity: NSObject, WCSessionDelegate {
             self.sendCountsToWatch()
         }
     }
+}
+
+extension Notification.Name {
+    static let phoneConnectivityDidUpdate = Notification.Name("phoneConnectivityDidUpdate")
 }
