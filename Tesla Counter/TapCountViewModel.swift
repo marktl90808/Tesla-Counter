@@ -73,9 +73,8 @@ class TapCountViewModel: ObservableObject {
         print("Updated tapCount after incrementing:", t)
         print("TapCounts saved to UserDefaults after incrementing:", tapCounts)
         
-        // NEW Send updated counts to watch.
-        
-        PhoneConnectivity.shared.sendCountToWatch(t)
+        // Send updated counts to watch
+        PhoneConnectivity.shared.updateWatch()
 
     }
     
@@ -90,6 +89,9 @@ class TapCountViewModel: ObservableObject {
             ct = 1
         }
         saveCounts()
+        
+        // Send updated counts to watch
+        PhoneConnectivity.shared.updateWatch()
     }
 
     func updateCountFromWatch(_ newCount: Int) {
@@ -156,6 +158,9 @@ class TapCountViewModel: ObservableObject {
               if let todayIndex = tapCounts.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: Date()) }) {
                 tapCounts[todayIndex].t -= 1
                 saveCounts()
+                
+                // Send updated counts to watch
+                PhoneConnectivity.shared.updateWatch()
             }
         }
     }

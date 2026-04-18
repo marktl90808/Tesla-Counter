@@ -51,7 +51,7 @@ struct ContentView: View {
     @State public var overrideCount: String = ""
     
     // Audio players for sound effects
-    @State var iS_O: Bool = true
+    @State var iSoundOn: Bool = true
     @State var player: AVAudioPlayer?
     @State var teslaPlayer: AVAudioPlayer?
     @State var tadaPlayer: AVAudioPlayer?
@@ -107,7 +107,7 @@ struct ContentView: View {
         storedCounts[date] = count
     }
     func playSound(soundName: String) {
-        guard iS_O else { return }
+        guard iSoundOn else { return }
         // Try common extensions and locations (with and without Sounds subdirectory)
         let extensions = ["mp3", "mpg"]
         var foundURL: URL? = nil
@@ -133,7 +133,7 @@ struct ContentView: View {
         }
     }
     func playSound(for tapCount: Int) {
-        guard iS_O else { return }
+        guard iSoundOn else { return }
         let soundName = viewModel.t % 10 == 0 ? "tada" : "Tesla"
         print("The count is \(viewModel.t) so I'm Playing sound: \(soundName)")
         let extensions = ["mp3", "mpg"]
@@ -293,7 +293,7 @@ struct ContentView: View {
     }
 
     func playCustomCTOrDefault() {
-        guard iS_O else { return }
+        guard iSoundOn else { return }
         if let url = customCTSoundURL {
             do {
                 player = try AVAudioPlayer(contentsOf: url)
@@ -307,7 +307,7 @@ struct ContentView: View {
     }
     
     func toggleSound() {
-        iS_O.toggle()
+        iSoundOn.toggle()
     }
     
     //    MARK: var body: some View
@@ -340,11 +340,11 @@ struct ContentView: View {
                                 Spacer()
                                 HStack {
                                     Spacer()
-                                    Button(iS_O ? " 🔈 ON " : " 🔇 Off") {
+                                    Button(iSoundOn ? " 🔈 ON " : " 🔇 Off") {
                                         toggleSound()
                                     }
                                     .buttonStyle(.plain)
-                                    .foregroundColor(iS_O ? .green : .red)
+                                    .foregroundColor(iSoundOn ? .green : .red)
                                     Spacer()
                                     Button(action: {
                                         viewModel.incrementCTForToday()
