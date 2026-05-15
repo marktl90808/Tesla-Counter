@@ -1,0 +1,7 @@
+Hello Mark,
+
+This is a sample assistant chat message prepared for testing the macOS Text-to-Speech script.
+
+The Tesla Counter app can now be extended to speak messages or save them as audio files.
+
+- End of sample.

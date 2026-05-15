@@ -24,7 +24,9 @@ struct ContentView: View {
     @State public var countInput = ""
     @State var userDefaultsData: [DailyCount] = []
     // Removed: @State private var showHistory = false
-    
+    @State private var isSoundEnabled = true
+    // Added for Siri Voice
+    @State private var speechSynthesizer = AVSpeechSynthesizer()
     // Initialization
     init() {
         viewModel.t = UserDefaults.standard.integer(forKey: userDefaultsKey) // Set the tapCount
@@ -72,13 +74,8 @@ struct ContentView: View {
     
     @State private var showSplash: Bool = true
     @State private var showPreferences = false
-    @State private var celebrationMultiple: Int = UserDefaults.standard.integer(forKey: "CelebrationMultiple") == 0 ? 10 : UserDefaults.standard.integer(forKey: "CelebrationMultiple")
+    @State private var celebrationMultiple: Int = UserDefaults.standard.integer(forKey: "CelebrationMultiple") == 0 ? 25 : UserDefaults.standard.integer(forKey: "CelebrationMultiple")
 
-    // Watch connectivity state for UI
-    @State private var isWatchPaired: Bool = false
-    @State private var isWatchReachable: Bool = false
-    @State private var isWatchAppInstalled: Bool = false
-    
     func updateCountForDate(_ date: Date, count: Int) {
 // Retrieve existing data from UserDefaults
         if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
@@ -113,7 +110,7 @@ struct ContentView: View {
     func playSound(soundName: String) {
         guard iSoundOn else { return }
         // Try common extensions and locations (with and without Sounds subdirectory)
-        let extensions = ["mp3", "mpg"]
+        let extensions = ["mp3"]
         var foundURL: URL? = nil
         for ext in extensions {
             if let url = Bundle.main.url(forResource: soundName, withExtension: ext, subdirectory: "Sounds") {
@@ -126,7 +123,7 @@ struct ContentView: View {
             }
         }
         guard let url = foundURL else {
-            print("Sound file not found: \(soundName) with extensions .mp3/.mpg")
+            print("Sound file not found: \(soundName) with extensions .mp3")
             return
         }
         do {
@@ -136,11 +133,31 @@ struct ContentView: View {
             print("Error playing sound: \(error.localizedDescription)")
         }
     }
+    private func triggerSound(name: String) {
+        guard isSoundEnabled else { return }
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+        try? AVAudioSession.sharedInstance().setActive(true)
+
+        let url = Bundle.main.url(forResource: name, withExtension: "mp3") ??
+                  Bundle.main.url(forResource: name, withExtension: "mp3", subdirectory: "Sounds")
+
+        if let soundURL = url {
+            player = try? AVAudioPlayer(contentsOf: soundURL)
+            player?.play()
+        }
+    }
+    private func handleTeslaTap() {
+        viewModel.incrementCountForToday()
+        let sound = viewModel.t.isMultiple(of: 10) ? "tada" : "Tesla"
+        triggerSound(name: sound)
+        currentImageIndex = (currentImageIndex + 1) % 19
+    }
+    
     func playSound(for tapCount: Int) {
         guard iSoundOn else { return }
         let soundName = viewModel.t % 10 == 0 ? "tada" : "Tesla"
         print("The count is \(viewModel.t) so I'm Playing sound: \(soundName)")
-        let extensions = ["mp3", "mpg"]
+        let extensions = ["mp3"]
         var foundURL: URL? = nil
         for ext in extensions {
             if let url = Bundle.main.url(forResource: soundName, withExtension: ext, subdirectory: "Sounds") {
@@ -341,50 +358,40 @@ struct ContentView: View {
 
         ZStack {
             NavigationStack {
-                VStack {
-
-                    // Watch status row
-                    HStack(spacing: 8) {
-                        Image(systemName: isWatchReachable ? "link.circle.fill" : "link.circle")
-                            .foregroundColor(isWatchReachable ? .green : .secondary)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(isWatchPaired ? "Watch Paired" : "Watch Not Paired")
-                                .font(.caption2)
-                            Text(isWatchAppInstalled ? "Watch App Installed" : "Watch App Not Installed")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                        }
-                        Spacer()
-                        Button(action: {
-                            // Force sending current counts to watch
-                            PhoneConnectivity.shared.updateWatch()
-                        }) {
-                            Text("Sync")
-                        }
-                        .buttonStyle(.bordered)
-                    }
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-
+                VStack(spacing: 8) {
                     Image("teslaLogo")
-                        .resizable().aspectRatio(contentMode: .fit)
+                    .resizable().aspectRatio(contentMode: .fit)
                         .onTapGesture {
                             showPreferences = true
                         }
-                    // MARK: the override sheet
-       
-                    // MARK: after the override sheet
-                                    Image("tc.\(currentImageIndex)")
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .onTapGesture {
-                                            viewModel.incrementCountForToday()
-                                            playCustomOrDefault()
-                                            currentImageIndex = (currentImageIndex + 1) % 19
-                                            UserDefaults.standard.set(viewModel.t, forKey: "Tap")
-                                            storeCount(for: currentDate, count: viewModel.t)
-                                            viewModel.saveCounts()
-                                        }
+                   // MARK: Main Image and currentImageIndex logic ensures the image always fills the width of the screen on iPhone, while allowing the Tesla logo at top to also fill the width without being cropped. The "Tesla" image is the tappable area that increments the count and changes to the next image in sequence.
+                    Image("tc.\(currentImageIndex)")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(maxWidth: .infinity) // This pushes it to the edges of the screen
+                        // .frame(maxHeight: 380) // Remove or increase this if you want it larger
+                        .onTapGesture {
+                            handleTeslaTap()
+                        }
+                    // Cybertruck Section
+                    VStack(spacing: 5) {
+//                        Text("Cybertrucks: \(viewModel.ct)")
+//                            .font(.headline)
+//                            .foregroundColor(.secondary)
+//
+//                        Image("tc.6")
+//                            .resizable()
+//                            .aspectRatio(contentMode: .fit)
+//                            .frame(height: 120)
+//                            .cornerRadius(12)
+//                            .overlay(
+//                                RoundedRectangle(cornerRadius: 12)
+//                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+//                            )
+//                            .onTapGesture {
+//                                playCustomCTOrDefault()
+//                            }
+                    }
                                 }
                                 Spacer()
                                 HStack {
@@ -398,7 +405,8 @@ struct ContentView: View {
                                     Button(action: {
                                         viewModel.incrementCTForToday()
                                         playCustomCTOrDefault()
-                                    }) {
+                                    })
+                                    {
                                         Image("ct")
                                             .resizable()
                                             .scaledToFit()
@@ -407,13 +415,33 @@ struct ContentView: View {
                                     .accessibilityLabel("Add CT")
                                     .buttonStyle(.plain)
                                     Spacer()
-                                    Text("Oops").foregroundColor(.red)
-                                        .onTapGesture {
-                                            playSound(soundName: "oops")
-                                            viewModel.decrementCountForToday()
-                                            print("Teslas: \(viewModel.t)")
-                                        }
-                                    Spacer()
+                VStack(spacing: 4) {
+                    Text("Oops")
+                        .foregroundColor(.red)
+                        .onTapGesture {
+                            playSound(soundName: "oops")
+                            viewModel.decrementCountForToday()
+                            print("Teslas: \(viewModel.t)")
+                        }
+
+                    Text("Oops Ct")
+                        .foregroundColor(.red)
+                        .onTapGesture {
+                            // Speak the phrase using Siri voice
+                            let utterance = AVSpeechUtterance(string: "My mistake, not a Cybertruck!")
+                            utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+                            utterance.rate = 0.5
+                            if speechSynthesizer.isSpeaking {
+                                speechSynthesizer.stopSpeaking(at: .immediate)
+                            }
+                            speechSynthesizer.speak(utterance)
+
+                            // Decrement CT count by 1
+                            viewModel.decrementCTCountForToday()
+                            print("CyberTruck: \(viewModel.ct)")
+                        }
+                }
+                Spacer()
                                 }
                 
     // Footer with tap count and buttons
@@ -599,18 +627,6 @@ struct ContentView: View {
             customCTSoundURL = UserDefaults.standard.url(forKey: "CustomCTSoundURL")
             customCTSoundName = UserDefaults.standard.string(forKey: "CustomCTSoundName") ?? ""
 
-            // Observe phone connectivity updates
-            NotificationCenter.default.addObserver(forName: .phoneConnectivityDidUpdate, object: nil, queue: .main) { note in
-                if let info = note.userInfo {
-                    if let paired = info["isPaired"] as? Bool { isWatchPaired = paired }
-                    if let installed = info["isWatchAppInstalled"] as? Bool { isWatchAppInstalled = installed }
-                    if let reachable = info["isReachable"] as? Bool { isWatchReachable = reachable }
-                }
-            }
-
-            // Request an initial sync to update watch state
-            PhoneConnectivity.shared.updateWatch()
-
             // Dismiss splash after a short delay
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 withAnimation(.easeInOut(duration: 0.4)) {
@@ -637,3 +653,4 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+

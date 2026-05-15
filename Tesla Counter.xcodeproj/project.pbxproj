@@ -8,8 +8,6 @@
 
 /* Begin PBXFileReference section */
 		E35E9A352F9437D900FBE2F9 /* Tesla Counter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tesla Counter.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		E35E9A372F9437D900FBE2F9 /* Tesla CounterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tesla CounterTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		E35E9A382F9437D900FBE2F9 /* Tesla CounterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tesla CounterUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -18,34 +16,10 @@
 			path = "Tesla Counter";
 			sourceTree = "<group>";
 		};
-		E35AC0A22F05EA5200E7384F /* Tesla CounterTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Tesla CounterTests";
-			sourceTree = "<group>";
-		};
-		E35AC0AC2F05EA5200E7384F /* Tesla CounterUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Tesla CounterUITests";
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		E35AC08F2F05EA5000E7384F /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E35AC09C2F05EA5200E7384F /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E35AC0A62F05EA5200E7384F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -59,8 +33,6 @@
 			isa = PBXGroup;
 			children = (
 				E35AC0942F05EA5000E7384F /* Tesla Counter */,
-				E35AC0A22F05EA5200E7384F /* Tesla CounterTests */,
-				E35AC0AC2F05EA5200E7384F /* Tesla CounterUITests */,
 				E35E9A362F9437D900FBE2F9 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -69,8 +41,6 @@
 			isa = PBXGroup;
 			children = (
 				E35E9A352F9437D900FBE2F9 /* Tesla Counter.app */,
-				E35E9A372F9437D900FBE2F9 /* Tesla CounterTests.xctest */,
-				E35E9A382F9437D900FBE2F9 /* Tesla CounterUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -100,50 +70,6 @@
 			productReference = E35E9A352F9437D900FBE2F9 /* Tesla Counter.app */;
 			productType = "com.apple.product-type.application";
 		};
-		E35AC09E2F05EA5200E7384F /* Tesla CounterTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = E35AC0B62F05EA5200E7384F /* Build configuration list for PBXNativeTarget "Tesla CounterTests" */;
-			buildPhases = (
-				E35AC09B2F05EA5200E7384F /* Sources */,
-				E35AC09C2F05EA5200E7384F /* Frameworks */,
-				E35AC09D2F05EA5200E7384F /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				E35AC0A22F05EA5200E7384F /* Tesla CounterTests */,
-			);
-			name = "Tesla CounterTests";
-			packageProductDependencies = (
-			);
-			productName = "Tesla CounterTests";
-			productReference = E35E9A372F9437D900FBE2F9 /* Tesla CounterTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		E35AC0A82F05EA5200E7384F /* Tesla CounterUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = E35AC0B92F05EA5200E7384F /* Build configuration list for PBXNativeTarget "Tesla CounterUITests" */;
-			buildPhases = (
-				E35AC0A52F05EA5200E7384F /* Sources */,
-				E35AC0A62F05EA5200E7384F /* Frameworks */,
-				E35AC0A72F05EA5200E7384F /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				E35AC0AC2F05EA5200E7384F /* Tesla CounterUITests */,
-			);
-			name = "Tesla CounterUITests";
-			packageProductDependencies = (
-			);
-			productName = "Tesla CounterUITests";
-			productReference = E35E9A382F9437D900FBE2F9 /* Tesla CounterUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -156,14 +82,6 @@
 				TargetAttributes = {
 					E35AC0912F05EA5000E7384F = {
 						CreatedOnToolsVersion = 16.4;
-					};
-					E35AC09E2F05EA5200E7384F = {
-						CreatedOnToolsVersion = 16.4;
-						TestTargetID = E35AC0912F05EA5000E7384F;
-					};
-					E35AC0A82F05EA5200E7384F = {
-						CreatedOnToolsVersion = 16.4;
-						TestTargetID = E35AC0912F05EA5000E7384F;
 					};
 				};
 			};
@@ -182,28 +100,12 @@
 			projectRoot = "";
 			targets = (
 				E35AC0912F05EA5000E7384F /* Tesla Counter */,
-				E35AC09E2F05EA5200E7384F /* Tesla CounterTests */,
-				E35AC0A82F05EA5200E7384F /* Tesla CounterUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		E35AC0902F05EA5000E7384F /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E35AC09D2F05EA5200E7384F /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E35AC0A72F05EA5200E7384F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -220,20 +122,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E35AC09B2F05EA5200E7384F /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E35AC0A52F05EA5200E7384F /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
@@ -241,6 +129,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -290,6 +179,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -299,6 +189,7 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -306,6 +197,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -349,6 +241,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -356,102 +249,43 @@
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
-		E35AC0B42F05EA5200E7384F /* Debug */ = {
+		E3A7A3882FA066C7008C5D53 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				COPY_PHASE_STRIP = NO;
 				DEVELOPMENT_TEAM = 7WXM4K4T3Z;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.codewithchris.Tesla-CounterTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tesla Counter.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Tesla Counter";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INFOPLIST_FILE = "Tesla-Counter-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.codedbymtl.Tesla-Counter";
+				PRODUCT_NAME = "Tesla Counter";
 			};
 			name = Debug;
 		};
-		E35AC0B82F05EA5200E7384F /* Release */ = {
+		E3A7A3892FA066C7008C5D53 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7WXM4K4T3Z;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.codewithchris.Tesla-CounterTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tesla Counter.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Tesla Counter";
-			};
-			name = Release;
-		};
-		E35AC0BA2F05EA5200E7384F /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7WXM4K4T3Z;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.codewithchris.Tesla-CounterUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "Tesla Counter";
-			};
-			name = Debug;
-		};
-		E35AC0BB2F05EA5200E7384F /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7WXM4K4T3Z;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.codewithchris.Tesla-CounterUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "Tesla Counter";
-			};
-			name = Release;
-		};
-		E35E9A5E2F9437D900FBE2F9 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 7WXM4K4T3Z;
-				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = com.madebyml;
+				INFOPLIST_FILE = "Tesla-Counter-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.codedbymtl.Tesla-Counter";
 				PRODUCT_NAME = "Tesla Counter";
 			};
 			name = Release;
-		};
-		E35E9A5F2F9437D900FBE2F9 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = "Tesla CounterTests";
-			};
-			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
@@ -468,26 +302,8 @@
 		E35AC0B32F05EA5200E7384F /* Build configuration list for PBXNativeTarget "Tesla Counter" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E35AC0B42F05EA5200E7384F /* Debug */,
-				E35E9A5E2F9437D900FBE2F9 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		E35AC0B62F05EA5200E7384F /* Build configuration list for PBXNativeTarget "Tesla CounterTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				E35AC0B82F05EA5200E7384F /* Release */,
-				E35E9A5F2F9437D900FBE2F9 /* Debug */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		E35AC0B92F05EA5200E7384F /* Build configuration list for PBXNativeTarget "Tesla CounterUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				E35AC0BA2F05EA5200E7384F /* Debug */,
-				E35AC0BB2F05EA5200E7384F /* Release */,
+				E3A7A3882FA066C7008C5D53 /* Debug */,
+				E3A7A3892FA066C7008C5D53 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -5,7 +5,6 @@
 //
 
 import Foundation
-import WatchConnectivity
 
 class TapCountViewModel: ObservableObject {
     static let shared = TapCountViewModel()
@@ -74,10 +73,6 @@ class TapCountViewModel: ObservableObject {
         saveCounts()
         print("Updated tapCount after incrementing:", t)
         print("TapCounts saved to UserDefaults after incrementing:", tapCounts)
-
-        // Send updated counts to watch
-        PhoneConnectivity.shared.updateWatch()
-
     }
 
     func incrementCTForToday() {
@@ -91,9 +86,6 @@ class TapCountViewModel: ObservableObject {
             ct = 1
         }
         saveCounts()
-
-        // Send updated counts to watch
-        PhoneConnectivity.shared.updateWatch()
     }
 
     func updateCountFromWatch(_ newCount: Int) {
@@ -168,16 +160,22 @@ class TapCountViewModel: ObservableObject {
 
         showAlert = true
     }
-
+    // decrement CT count hopefully without going negative
+    func decrementCTCountForToday() {
+       if ct > 0 {
+            ct -= 1
+              if let todayIndex = tapCounts.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: Date()) }) {
+                tapCounts[todayIndex].ct -= 1
+                saveCounts()
+            }
+        }
+    }
     func decrementCountForToday() {
        if t > 0 {
             t -= 1
               if let todayIndex = tapCounts.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: Date()) }) {
                 tapCounts[todayIndex].t -= 1
                 saveCounts()
-
-                // Send updated counts to watch
-                PhoneConnectivity.shared.updateWatch()
             }
         }
     }
